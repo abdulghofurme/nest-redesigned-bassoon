@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
 import { PrismaService } from './prisma/prisma.service';
+import { ValidationService } from './validation/validation.service';
 
 @Global()
 @Module({
@@ -15,6 +16,6 @@ import { PrismaService } from './prisma/prisma.service';
       isGlobal: true,
     }),
   ],
-  providers: [PrismaService],
+  providers: [PrismaService, ValidationService],
 })
 export class CommonModule {}
