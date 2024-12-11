@@ -74,4 +74,90 @@ describe('AppController (e2e)', () => {
       expect(response.body.errors).toBeDefined();
     });
   });
+
+  describe('POST /api/users/login', () => {
+    let password = 'password',
+      name = 'Your Name';
+
+    beforeEach(async () => {
+      await testService.deleteUser(username);
+      await testService.registerUser({
+        username,
+        name,
+        password,
+      });
+    });
+
+    it('should be rejected if request is invalid', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/api/users/login')
+        .send({
+          username: '',
+          password: '',
+        });
+
+      console.log(response.body);
+
+      expect(response.status).toBe(HttpStatus.BAD_REQUEST);
+      expect(response.body.errors).toBeDefined();
+    });
+
+    it('should be able to login', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/api/users/login')
+        .send({
+          username,
+          password,
+        });
+
+      console.log(response.body);
+
+      expect(response.status).toBe(HttpStatus.OK);
+      expect(response.body.data.username).toBe(username);
+      expect(response.body.data.name).toBe(name);
+      expect(response.body.data.token).toBeDefined();
+    });
+
+    it('should be rejected if username not exists', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/api/users/login')
+        .send({
+          username: 'nganu',
+          password,
+        });
+
+      console.log(response.body);
+
+      expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
+      expect(response.body.errors).toBeDefined();
+    });
+
+    it('should be rejected if password wrong', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/api/users/login')
+        .send({
+          username,
+          password: 'nganu',
+        });
+
+      console.log(response.body);
+
+      expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
+      expect(response.body.errors).toBeDefined();
+    });
+
+    it('should be rejected', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/api/users/login')
+        .send({
+          username: 'nganu',
+          password: 'nganu',
+        });
+
+      console.log(response.body);
+
+      expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
+      expect(response.body.errors).toBeDefined();
+    });
+  });
 });
