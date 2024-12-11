@@ -15,7 +15,7 @@ export class TestService {
     });
   }
 
-  async registerUser(userPaylod: RegisterUserRequest) {
+  async registerUser(userPaylod: RegisterUserRequest & {token?: string}) {
     userPaylod.password = await bcrypt.hash(userPaylod.password, 10);
 
     await this.prismaService.user.create({

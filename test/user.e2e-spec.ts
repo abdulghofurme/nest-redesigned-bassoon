@@ -52,6 +52,8 @@ describe('AppController (e2e)', () => {
           name: 'Test User',
         });
 
+      console.log(response.body);
+
       expect(response.status).toBe(HttpStatus.CREATED);
       expect(response.body.data.username).toBe(username);
     });
@@ -88,6 +90,10 @@ describe('AppController (e2e)', () => {
       });
     });
 
+    afterAll(async () => {
+      await testService.deleteUser(username);
+    });
+
     it('should be rejected if request is invalid', async () => {
       const response = await request(app.getHttpServer())
         .post('/api/users/login')
@@ -95,8 +101,6 @@ describe('AppController (e2e)', () => {
           username: '',
           password: '',
         });
-
-      console.log(response.body);
 
       expect(response.status).toBe(HttpStatus.BAD_REQUEST);
       expect(response.body.errors).toBeDefined();
@@ -109,8 +113,6 @@ describe('AppController (e2e)', () => {
           username,
           password,
         });
-
-      console.log(response.body);
 
       expect(response.status).toBe(HttpStatus.OK);
       expect(response.body.data.username).toBe(username);
@@ -126,8 +128,6 @@ describe('AppController (e2e)', () => {
           password,
         });
 
-      console.log(response.body);
-
       expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
       expect(response.body.errors).toBeDefined();
     });
@@ -139,8 +139,6 @@ describe('AppController (e2e)', () => {
           username,
           password: 'nganu',
         });
-
-      console.log(response.body);
 
       expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
       expect(response.body.errors).toBeDefined();
@@ -154,10 +152,47 @@ describe('AppController (e2e)', () => {
           password: 'nganu',
         });
 
-      console.log(response.body);
+      expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
+      expect(response.body.errors).toBeDefined();
+    });
+  });
+
+  describe('GET /api/users/current', () => {
+    let password = 'password',
+      name = 'Your Name',
+      token = 'test';
+
+    beforeEach(async () => {
+      await testService.deleteUser(username);
+      await testService.registerUser({
+        username,
+        name,
+        password,
+        token,
+      });
+    });
+
+    afterAll(async () => {
+      await testService.deleteUser(username);
+    });
+
+    it('should be rejected if token is invalid', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/api/users/current')
+        .set('Authorization', 'wrong');
 
       expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
       expect(response.body.errors).toBeDefined();
+    });
+
+    it('should be able to get current user', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/api/users/current')
+        .set('Authorization', token);
+
+      expect(response.status).toBe(HttpStatus.OK);
+      expect(response.body.data.username).toBe(username);
+      expect(response.body.data.name).toBe(name);
     });
   });
 });

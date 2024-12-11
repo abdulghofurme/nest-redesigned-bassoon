@@ -1,7 +1,20 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { WebResponse } from 'src/model/web.model';
-import { LoginUserRequest, RegisterUserRequest, UserResponse } from 'src/model/user.model';
+import {
+  LoginUserRequest,
+  RegisterUserRequest,
+  UserResponse,
+} from 'src/model/user.model';
+import { Auth } from 'src/common/auth/auth.decorator';
+import { User } from '@prisma/client';
 
 @Controller('/api/users')
 export class UserController {
@@ -20,10 +33,20 @@ export class UserController {
 
   @Post('/login')
   @HttpCode(HttpStatus.OK)
-  async login( 
+  async login(
     @Body() request: LoginUserRequest,
   ): Promise<WebResponse<UserResponse>> {
     const result = await this.userService.login(request);
+
+    return {
+      data: result,
+    };
+  }
+
+  @Get('/current')
+  @HttpCode(HttpStatus.OK)
+  async get(@Auth() user: User): Promise<WebResponse<UserResponse>> {
+    const result = await this.userService.get(user);
 
     return {
       data: result,
