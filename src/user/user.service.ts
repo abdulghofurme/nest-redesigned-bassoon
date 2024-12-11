@@ -5,6 +5,7 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import {
   LoginUserRequest,
   RegisterUserRequest,
+  UpdateUserRequest,
   UserResponse,
 } from 'src/model/user.model';
 import { ValidationService } from 'src/common/validation/validation.service';
@@ -24,7 +25,7 @@ export class UserService {
   ) {}
 
   async register(request: RegisterUserRequest): Promise<UserResponse> {
-    this.logger.info(`Register new user ${JSON.stringify(request)}`);
+    this.logger.debug(`UserService.Register(${JSON.stringify(request)})`);
     const registerRequest =
       this.validationService.validate<RegisterUserRequest>(
         UserValidation.REGISTER,
@@ -54,7 +55,7 @@ export class UserService {
   }
 
   async login(request: LoginUserRequest): Promise<UserResponse> {
-    this.logger.info(`UserService.Login(${JSON.stringify(request)})`);
+    this.logger.debug(`UserService.Login(${JSON.stringify(request)})`);
 
     const loginRequest: LoginUserRequest = this.validationService.validate(
       UserValidation.LOGIN,
@@ -106,6 +107,45 @@ export class UserService {
     return {
       username: user.username,
       name: user.name,
+    };
+  }
+
+  async update(user: User, request: UpdateUserRequest): Promise<UserResponse> {
+    this.logger.debug(
+      `UserService.update(${user.username}, ${JSON.stringify(request)})`,
+    );
+
+    if (!request.name && !request.password) {
+      throw new HttpException('Invalid request body', HttpStatus.FORBIDDEN);
+      // return {
+      //   username: user.username,
+      //   name: user.password,
+      // };
+    }
+
+    const updateRequest = this.validationService.validate(
+      UserValidation.UPDATE,
+      request,
+    );
+
+    if (updateRequest.name) {
+      user.name = updateRequest.name;
+    }
+
+    if (updateRequest.password) {
+      user.password = await bcrypt.hash(updateRequest.password, 10);
+    }
+
+    const result = await this.prismaService.user.update({
+      where: {
+        username: user.username,
+      },
+      data: user,
+    });
+
+    return {
+      username: result.username,
+      name: result.name,
     };
   }
 }

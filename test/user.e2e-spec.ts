@@ -52,8 +52,6 @@ describe('AppController (e2e)', () => {
           name: 'Test User',
         });
 
-      console.log(response.body);
-
       expect(response.status).toBe(HttpStatus.CREATED);
       expect(response.body.data.username).toBe(username);
     });
@@ -194,5 +192,92 @@ describe('AppController (e2e)', () => {
       expect(response.body.data.username).toBe(username);
       expect(response.body.data.name).toBe(name);
     });
+  });
+
+  describe('PATCH /api/users/current', () => {
+    let password = 'password',
+      name = 'Your Name',
+      token = 'test';
+
+    beforeEach(async () => {
+      await testService.deleteUser(username);
+      await testService.registerUser({
+        username,
+        name,
+        password,
+        token,
+      });
+    });
+
+    afterAll(async () => {
+      await testService.deleteUser(username);
+    });
+
+    it('should be rejected if request is invalid', async () => {
+      const response = await request(app.getHttpServer())
+        .patch('/api/users/current')
+        .set('Authorization', token)
+        .send({
+          name: '',
+          password: '',
+        });
+
+      expect(response.status).toBe(HttpStatus.FORBIDDEN);
+      expect(response.body.errors).toBeDefined();
+    });
+
+    it('should be rejected if token is invalid', async () => {
+      const response = await request(app.getHttpServer())
+        .patch('/api/users/current')
+        .set('Authorization', 'wrong')
+        .send({
+          name: '',
+          password: '',
+        });
+
+      expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
+      expect(response.body.errors).toBeDefined();
+    });
+
+    it('should be updated with new name', async () => {
+      const response = await request(app.getHttpServer())
+        .patch('/api/users/current')
+        .set('Authorization', token)
+        .send({
+          name: 'Name updated',
+        });
+
+      expect(response.status).toBe(HttpStatus.OK);
+      expect(response.body.data.name).toBe('Name updated');
+    });
+
+    it('should be updated with new password', async () => {
+      let response = await request(app.getHttpServer())
+        .patch('/api/users/current')
+        .set('Authorization', token)
+        .send({
+          password: 'password updated',
+        });
+
+      response = await request(app.getHttpServer())
+        .post('/api/users/login')
+        .send({
+          username,
+          password: 'password updated'
+        });
+
+      expect(response.status).toBe(HttpStatus.OK);
+      expect(response.body.data.token).toBeDefined();
+    });
+
+    // it('should be able to get current user', async () => {
+    //   const response = await request(app.getHttpServer())
+    //     .get('/api/users/current')
+    //     .set('Authorization', token);
+
+    //   expect(response.status).toBe(HttpStatus.OK);
+    //   expect(response.body.data.username).toBe(username);
+    //   expect(response.body.data.name).toBe(name);
+    // });
   });
 });
