@@ -5,7 +5,7 @@ import { AppModule } from '../src/app.module';
 import { TestService } from './test.service';
 import { TestModule } from './test.module';
 
-describe('AppController (e2e)', () => {
+describe('UserController (e2e)', () => {
   let app: INestApplication;
   let testService: TestService;
   const username = 'testusername';
@@ -22,12 +22,12 @@ describe('AppController (e2e)', () => {
   });
 
   describe('POST /api/users', () => {
-    beforeEach(() => {
-      testService.deleteUser(username);
+    beforeEach(async () => {
+      await testService.deleteUser(username);
     });
 
-    afterEach(() => {
-      testService.deleteUser(username);
+    afterEach(async () => {
+      await testService.deleteUser(username);
     });
 
     it('should be rejected if request is invalid', async () => {
@@ -88,7 +88,7 @@ describe('AppController (e2e)', () => {
       });
     });
 
-    afterAll(async () => {
+    afterEach(async () => {
       await testService.deleteUser(username);
     });
 
@@ -170,7 +170,7 @@ describe('AppController (e2e)', () => {
       });
     });
 
-    afterAll(async () => {
+    afterEach(async () => {
       await testService.deleteUser(username);
     });
 
@@ -209,7 +209,7 @@ describe('AppController (e2e)', () => {
       });
     });
 
-    afterAll(async () => {
+    afterEach(async () => {
       await testService.deleteUser(username);
     });
 
@@ -286,7 +286,7 @@ describe('AppController (e2e)', () => {
       });
     });
 
-    afterAll(async () => {
+    afterEach(async () => {
       await testService.deleteUser(username);
     });
 

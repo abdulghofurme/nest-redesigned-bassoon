@@ -15,11 +15,19 @@ export class TestService {
     });
   }
 
-  async registerUser(userPaylod: RegisterUserRequest & {token?: string}) {
+  async registerUser(userPaylod: RegisterUserRequest & { token?: string }) {
     userPaylod.password = await bcrypt.hash(userPaylod.password, 10);
 
     await this.prismaService.user.create({
       data: userPaylod,
+    });
+  }
+
+  async deleteContact(username: string) {
+    await this.prismaService.contact.deleteMany({
+      where: {
+        username,
+      },
     });
   }
 }
