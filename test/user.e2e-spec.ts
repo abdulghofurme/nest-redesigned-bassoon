@@ -263,21 +263,56 @@ describe('AppController (e2e)', () => {
         .post('/api/users/login')
         .send({
           username,
-          password: 'password updated'
+          password: 'password updated',
         });
 
       expect(response.status).toBe(HttpStatus.OK);
       expect(response.body.data.token).toBeDefined();
     });
+  });
 
-    // it('should be able to get current user', async () => {
-    //   const response = await request(app.getHttpServer())
-    //     .get('/api/users/current')
-    //     .set('Authorization', token);
+  describe('DELETE /api/users/current', () => {
+    let password = 'password',
+      name = 'Your Name',
+      token = 'test';
 
-    //   expect(response.status).toBe(HttpStatus.OK);
-    //   expect(response.body.data.username).toBe(username);
-    //   expect(response.body.data.name).toBe(name);
-    // });
+    beforeEach(async () => {
+      await testService.deleteUser(username);
+      await testService.registerUser({
+        username,
+        name,
+        password,
+        token,
+      });
+    });
+
+    afterAll(async () => {
+      await testService.deleteUser(username);
+    });
+
+    it('should be rejected if token is invalid', async () => {
+      const response = await request(app.getHttpServer())
+        .delete('/api/users/current')
+        .set('Authorization', 'wrong');
+
+      expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
+      expect(response.body.errors).toBeDefined();
+    });
+
+    it('should be loged out', async () => {
+      let response = await request(app.getHttpServer())
+        .delete('/api/users/current')
+        .set('Authorization', token);
+
+      expect(response.status).toBe(HttpStatus.OK);
+      expect(response.body.data).toBeTruthy();
+
+      response = await request(app.getHttpServer())
+        .get('/api/users/current')
+        .set('Authorization', token);
+
+      expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
+      expect(response.body.errors).toBeDefined();
+    });
   });
 });
