@@ -9,6 +9,7 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { ContactService } from './contact.service';
 import { Auth } from 'src/common/auth/auth.decorator';
@@ -70,5 +71,24 @@ export class ContactController {
     return {
       data: result,
     };
+  }
+
+  @Get()
+  @HttpCode(HttpStatus.OK)
+  async search(
+    @Auth() user: User,
+    @Query('name') name?: string,
+    @Query('email') email?: string,
+    @Query('phone') phone?: string,
+    @Query('page', new ParseIntPipe({ optional: true })) page?: number,
+    @Query('size', new ParseIntPipe({ optional: true })) size?: number,
+  ): Promise<WebResponse<ContactResponse[]>> {
+    return this.contactService.search(user, {
+      name,
+      email,
+      phone,
+      page: page || 1,
+      size: size || 10,
+    });
   }
 }
