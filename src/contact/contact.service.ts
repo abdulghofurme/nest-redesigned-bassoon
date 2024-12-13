@@ -97,4 +97,17 @@ export class ContactService {
     });
     return this.toContactResponse(contact);
   }
+
+  async remove(user: User, contactId: number): Promise<boolean> {
+    await this.checkContactExists(user.username, contactId);
+
+    await this.prismaService.contact.delete({
+      where: {
+        id: contactId,
+        username: user.username,
+      },
+    });
+
+    return true;
+  }
 }

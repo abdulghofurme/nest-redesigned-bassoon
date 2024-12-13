@@ -138,4 +138,49 @@ describe('ContactController (e2e', () => {
       expect(response.body.data.id).toBe(contact.id);
     });
   });
+
+  describe('DELETE /api/contacts/:currentId', () => {
+    beforeEach(async () => {
+      await testService.deleteContact(username);
+      await testService.deleteUser(username);
+
+      await testService.registerUser({
+        username,
+        name: 'Test Contact',
+        password: 'rahasia',
+        token,
+      });
+    });
+
+    afterAll(async () => {
+      await testService.deleteContact(username);
+      await testService.deleteUser(username);
+    });
+
+    it('should be rejected if contact not found', async () => {
+      const response = await request(app.getHttpServer())
+        .delete(`/api/contacts/9000`)
+        .set('Authorization', token);
+
+      console.log(response.body);
+      expect(response.status).toBe(HttpStatus.NOT_FOUND);
+      expect(response.body.errors).toBeDefined();
+    });
+
+    it('should be deleted', async () => {
+      const contact = await testService.createContact(username, {
+        first_name: 'Test Contact',
+        last_name: 'Create',
+        email: 'contact@email.com',
+        phone: '1234',
+      });
+
+      const response = await request(app.getHttpServer())
+        .delete(`/api/contacts/${contact.id}`)
+        .set('Authorization', token);
+
+      expect(response.status).toBe(HttpStatus.OK);
+      expect(response.body.data).toBe(true);
+    });
+  });
 });

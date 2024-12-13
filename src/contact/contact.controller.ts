@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -11,7 +12,11 @@ import {
 } from '@nestjs/common';
 import { ContactService } from './contact.service';
 import { Auth } from 'src/common/auth/auth.decorator';
-import { ContactResponse, CreateContactRequest, UpdateContactRequest } from 'src/model/contact.model';
+import {
+  ContactResponse,
+  CreateContactRequest,
+  UpdateContactRequest,
+} from 'src/model/contact.model';
 import { WebResponse } from 'src/model/web.model';
 import { User } from '@prisma/client';
 
@@ -48,10 +53,22 @@ export class ContactController {
     @Param('contactId', ParseIntPipe) contactId: number,
     @Body() request: UpdateContactRequest,
   ): Promise<WebResponse<ContactResponse>> {
-    request.id = contactId
+    request.id = contactId;
     const result = await this.contactService.update(user, request);
 
     return { data: result };
   }
 
+  @Delete('/:contactId')
+  @HttpCode(HttpStatus.OK)
+  async remove(
+    @Auth() user: User,
+    @Param('contactId', ParseIntPipe) contactId: number,
+  ) {
+    const result = await this.contactService.remove(user, contactId);
+
+    return {
+      data: result,
+    };
+  }
 }
