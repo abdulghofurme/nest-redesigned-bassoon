@@ -133,4 +133,16 @@ export class AddressService {
 
     return true;
   }
+
+  async list(user: User, contactId: number): Promise<AddressResponse[]> {
+    await this.contactService.checkContactExists(user.username, contactId);
+
+    const addresses = await this.prismaService.address.findMany({
+      where: {
+        contact_id: contactId,
+      },
+    });
+
+    return addresses;
+  }
 }
