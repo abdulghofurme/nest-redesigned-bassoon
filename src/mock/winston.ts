@@ -1,4 +1,4 @@
-import { Provider } from "@nestjs/common";
+import { Provider } from '@nestjs/common';
 
 export const mockWinston = {
   info: jest.fn(),
@@ -7,6 +7,6 @@ export const mockWinston = {
 };
 
 export const MockWinston: Provider = {
-    provide: 'winston', 
-    useValue: mockWinston
-}
+  provide: 'winston',
+  useValue: mockWinston,
+};

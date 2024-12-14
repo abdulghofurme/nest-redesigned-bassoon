@@ -119,12 +119,12 @@ export class AddressService {
       request.contact_id,
     );
 
-    let address = await this.checkAddressExist(
+    const address = await this.checkAddressExist(
       request.address_id,
       request.contact_id,
     );
 
-    address = await this.prismaService.address.delete({
+    await this.prismaService.address.delete({
       where: {
         id: address.id,
         contact_id: address.contact_id,

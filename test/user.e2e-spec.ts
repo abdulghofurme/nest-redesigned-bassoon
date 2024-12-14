@@ -76,7 +76,7 @@ describe('UserController (e2e)', () => {
   });
 
   describe('POST /api/users/login', () => {
-    let password = 'password',
+    const password = 'password',
       name = 'Your Name';
 
     beforeEach(async () => {
@@ -156,7 +156,7 @@ describe('UserController (e2e)', () => {
   });
 
   describe('GET /api/users/current', () => {
-    let password = 'password',
+    const password = 'password',
       name = 'Your Name',
       token = 'test';
 
@@ -195,7 +195,7 @@ describe('UserController (e2e)', () => {
   });
 
   describe('PATCH /api/users/current', () => {
-    let password = 'password',
+    const password = 'password',
       name = 'Your Name',
       token = 'test';
 
@@ -272,7 +272,7 @@ describe('UserController (e2e)', () => {
   });
 
   describe('DELETE /api/users/current', () => {
-    let password = 'password',
+    const password = 'password',
       name = 'Your Name',
       token = 'test';
 

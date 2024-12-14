@@ -9,8 +9,6 @@ describe('ContactController', () => {
     create: jest.fn(),
   };
 
-
-
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ContactController],
@@ -18,8 +16,8 @@ describe('ContactController', () => {
         {
           provide: ContactService,
           useValue: mockContactService,
-        }
-      ]
+        },
+      ],
     }).compile();
 
     controller = module.get<ContactController>(ContactController);

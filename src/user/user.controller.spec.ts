@@ -39,7 +39,7 @@ describe('UserController', () => {
       password: 'rahasia',
       username: 'username',
     });
-    console.log(result)
+    console.log(result);
     expect(result).toEqual({ data: { username: 'username', name: 'Test' } });
   });
 });
