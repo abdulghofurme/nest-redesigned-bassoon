@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -67,5 +68,20 @@ export class AddressController {
     return {
       data: result,
     };
+  }
+
+  @Delete('/:addressId')
+  @HttpCode(HttpStatus.OK)
+  async remove(
+    @Auth() user: User,
+    @Param('contactId', ParseIntPipe) contactId: number,
+    @Param('addressId', ParseIntPipe) addressId: number,
+  ): Promise<WebResponse<boolean>> {
+    const result = await this.addressService.remove(user, {
+      address_id: addressId,
+      contact_id: contactId,
+    });
+
+    return { data: result };
   }
 }
