@@ -7,6 +7,7 @@ import {
   AddressResponse,
   CreateAddressRequest,
   GetAddressRequest,
+  UpdateAddressRequest,
 } from 'src/model/address.model';
 import { AddressValidation } from './address.validation';
 
@@ -27,6 +28,24 @@ export class AddressService {
       province: address.province,
       street: address.street,
     };
+  }
+
+  async checkAddressExist(
+    address_id: number,
+    contact_id: number,
+  ): Promise<Address> {
+    const address = await this.prismaService.address.findFirst({
+      where: {
+        id: address_id,
+        contact_id: contact_id,
+      },
+    });
+
+    if (!address) {
+      throw new HttpException('Address not found', HttpStatus.NOT_FOUND);
+    }
+
+    return address;
   }
 
   async create(
@@ -56,16 +75,40 @@ export class AddressService {
       request.contact_id,
     );
 
-    const address = await this.prismaService.address.findFirst({
-      where: {
-        id: request.address_id,
-        contact_id: request.contact_id,
-      },
-    });
+    const address = await this.checkAddressExist(
+      request.address_id,
+      request.contact_id,
+    );
 
-    if (!address) {
-      throw new HttpException('Address not found', HttpStatus.NOT_FOUND);
-    }
+    return this.toAddressResponse(address);
+  }
+
+  async update(
+    user: User,
+    request: UpdateAddressRequest,
+  ): Promise<AddressResponse> {
+    const updateRequest = this.validationService.validate(
+      AddressValidation.UPDATE,
+      request,
+    );
+
+    await this.contactService.checkContactExists(
+      user.username,
+      updateRequest.contact_id,
+    );
+
+    let address = await this.checkAddressExist(
+      updateRequest.id,
+      updateRequest.contact_id,
+    );
+
+    address = await this.prismaService.address.update({
+      where: {
+        id: address.id,
+        contact_id: address.contact_id,
+      },
+      data: updateRequest,
+    });
 
     return this.toAddressResponse(address);
   }
